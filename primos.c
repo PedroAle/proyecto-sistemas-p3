@@ -1,24 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#define INPUT_ARG_POS 1
+#include <string.h>
 #define ARGS_GUIDE "Command: ./primos entrada.txt [-t | -p] [-n N]\n"
 #define INVALID_ARGS_MSG "./primos: First argument reserved for the input text file\n"
 
+struct list {
+    int n;
+    struct list *next;
+};
+
+typedef struct list LIST;
+
 int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N);
 int file_exists(char* file_name);
+LIST* exportNumbers(char* file_name);
 
 int main(int argc, char *argv[]) {
 	printf("Proyecto Sistemas de Operacion - Problema 1\n");
-	//Estos flags permiten determinar un solo modo (-t o -p) en caso de que se llame -tp | -pt | - t - p | etc, que seria el primero en ser llamado
+	/*
+	Estos flags permiten determinar un solo modo (-t o -p) en caso de que se llame -tp | -pt | - t - p | etc,
+  que seria el primero en ser llamado
+	*/
 	int t_flag = 0, p_flag = 0;
 	int N = 0;
 	char * archivo_entrada;
-	//Aumentamos el indice optind para reservar el primer argumento para el archivo de texto de entrada
-	optind = INPUT_ARG_POS + 1;
-	if (argc > 0) {
-		archivo_entrada = argv[INPUT_ARG_POS];
-	}
+	if (argc > 1) {
+    //Aumentamos el indice optind para reservar el primer argumento para el archivo de texto de entrada
+    optind = 2;
+		archivo_entrada = argv[1];
+	} else {
+    printf("Missing required arguments\n%s\n", ARGS_GUIDE);
+    return 1;
+  }
 
 	int c;
 	while ((c = getopt(argc,argv,"tpn:")) != -1) {
@@ -45,16 +59,17 @@ int main(int argc, char *argv[]) {
 		return 1;
 
 	printf("Good shit!\n");
+	LIST* lista_numeros = exportNumbers(archivo_entrada);
 	return 0;
 }
 
 /**
  * Valida los argumentos necesarios, devuelve 1 si son validos y 0 si no lo son
- * @param  {char*} archivo_entrada Archivo de texto que contiene los numeros a trabajar.
- * @param  {int}   t_flag          Estado que determina si el programa esta en modo hilos.
- * @param  {int}   p_flag 				 Estado que determina si el programa esta en modo procesos.
- * @param  {int}   N      				 Numero de procesos/hilos que usara el programa.
- * @return {int} 	 								 0 - Input invalido. 1 - Input valido.
+ * @param   archivo_entrada Archivo de texto que contiene los numeros a trabajar.
+ * @param   t_flag          Estado que determina si el programa esta en modo hilos.
+ * @param   p_flag 				 Estado que determina si el programa esta en modo procesos.
+ * @param   N      				 Numero de procesos/hilos que usara el programa.
+ * @return  								 0 - Input invalido. 1 - Input valido.
  */
 int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N) {
 	//TODO: Validar que el archivo de entrada exista
@@ -91,4 +106,33 @@ int file_exists(char* file_name) {
 	}
 	else
 		return 0;
+}
+
+/**
+ * Exporta los numeros de un archivo de texto (un numero por linea) a una lista
+ * @param  file_name  archivo que sera abierto
+ * @return            puntero a la cabeza de una nueva lista que contiene los numeros del archivo. Null/0 si no habian numeros
+ */
+LIST* exportNumbers(char* file_name){
+	FILE *fp;
+  char line[10];
+  LIST *current, *head;
+
+  head = current = NULL;
+  fp = fopen(file_name, "r");
+
+  while(fgets(line, sizeof(line), fp)){
+      LIST *node = malloc(sizeof(LIST));
+      node->n = atoi(line);
+      node->next =NULL;
+
+      if(head == NULL){
+          current = head = node;
+      } else {
+          current = current->next = node;
+      }
+  }
+  fclose(fp);
+
+  return head;
 }
