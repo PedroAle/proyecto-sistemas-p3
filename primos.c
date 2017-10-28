@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#define INPUT_ARG_POS 1
 #define ARGS_GUIDE "Command: ./primos entrada.txt [-t | -p] [-n N]\n"
 #define INVALID_ARGS_MSG "./primos: First argument reserved for the input text file\n"
 
@@ -19,15 +18,21 @@ LIST* exportNumbers(char* file_name);
 
 int main(int argc, char *argv[]) {
 	printf("Proyecto Sistemas de Operacion - Problema 1\n");
-	//Estos flags permiten determinar un solo modo (-t o -p) en caso de que se llame -tp | -pt | - t - p | etc, que seria el primero en ser llamado
+	/*
+	Estos flags permiten determinar un solo modo (-t o -p) en caso de que se llame -tp | -pt | - t - p | etc,
+  que seria el primero en ser llamado
+	*/
 	int t_flag = 0, p_flag = 0;
 	int N = 0;
 	char * archivo_entrada;
-	//Aumentamos el indice optind para reservar el primer argumento para el archivo de texto de entrada
-	optind = INPUT_ARG_POS + 1;
-	if (argc > 0) {
-		archivo_entrada = argv[INPUT_ARG_POS];
-	}
+	if (argc > 1) {
+    //Aumentamos el indice optind para reservar el primer argumento para el archivo de texto de entrada
+    optind = 2;
+		archivo_entrada = argv[1];
+	} else {
+    printf("Missing required arguments\n%s\n", ARGS_GUIDE);
+    return 1;
+  }
 
 	int c;
 	while ((c = getopt(argc,argv,"tpn:")) != -1) {
@@ -56,12 +61,6 @@ int main(int argc, char *argv[]) {
 	printf("Good shit!\n");
 	LIST* lista_numeros = exportNumbers(archivo_entrada);
 
-	LIST* d = lista_numeros;
-	//TODO: borrar esto, nada mas imprimimos para probar
-	while (d) {
-		printf("%d\n", d->n);
-		d = d->next;
-	}
 	return 0;
 }
 
