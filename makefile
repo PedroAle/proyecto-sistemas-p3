@@ -8,6 +8,3 @@ primos: primos.o
 clean:
 	-rm -f primos.o
 	-rm -f primos
-
-run: primos
-	./primos

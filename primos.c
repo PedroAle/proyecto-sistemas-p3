@@ -60,7 +60,6 @@ int main(int argc, char *argv[]) {
 
 	printf("Good shit!\n");
 	LIST* lista_numeros = exportNumbers(archivo_entrada);
-
 	return 0;
 }
 
