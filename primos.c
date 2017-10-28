@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <pthread.h>
 #define ARGS_GUIDE "Command: ./primos entrada.txt [-t | -p] [-n N]\n"
 #define INVALID_ARGS_MSG "./primos: First argument reserved for the input text file\n"
 
@@ -97,7 +98,6 @@ int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N) {
  * @return           0 - No existe el archivo. 1 - Existe el archivo
  */
 int file_exists(char* file_name) {
-	//TODO: Reescribir funcion usando funcion access()
 	FILE* file = fopen(file_name, "r");
 
 	if (file){
