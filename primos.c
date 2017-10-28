@@ -7,15 +7,15 @@
 #define INVALID_ARGS_MSG "./primos: First argument reserved for the input text file\n"
 
 struct list {
-
-    char *string;
+    int n;
     struct list *next;
 };
 
 typedef struct list LIST;
 
 int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N);
-int openfile(char* file_name);
+int file_exists(char* file_name);
+LIST* exportNumbers(char* file_name);
 
 int main(int argc, char *argv[]) {
 	printf("Proyecto Sistemas de Operacion - Problema 1\n");
@@ -54,20 +54,28 @@ int main(int argc, char *argv[]) {
 		return 1;
 
 	printf("Good shit!\n");
+	LIST* lista_numeros = exportNumbers(archivo_entrada);
+
+	LIST* d = lista_numeros;
+	//TODO: borrar esto, nada mas imprimimos para probar
+	while (d) {
+		printf("%d\n", d->n);
+		d = d->next;
+	}
 	return 0;
 }
 
 /**
  * Valida los argumentos necesarios, devuelve 1 si son validos y 0 si no lo son
- * @param  {char*} archivo_entrada Archivo de texto que contiene los numeros a trabajar.
- * @param  {int}   t_flag          Estado que determina si el programa esta en modo hilos.
- * @param  {int}   p_flag 				 Estado que determina si el programa esta en modo procesos.
- * @param  {int}   N      				 Numero de procesos/hilos que usara el programa.
- * @return {int} 	 								 0 - Input invalido. 1 - Input valido.
+ * @param   archivo_entrada Archivo de texto que contiene los numeros a trabajar.
+ * @param   t_flag          Estado que determina si el programa esta en modo hilos.
+ * @param   p_flag 				 Estado que determina si el programa esta en modo procesos.
+ * @param   N      				 Numero de procesos/hilos que usara el programa.
+ * @return  								 0 - Input invalido. 1 - Input valido.
  */
 int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N) {
 	//TODO: Validar que el archivo de entrada exista
-	if (!openfile(archivo_entrada)){
+	if (!file_exists(archivo_entrada)){
 		printf("./primos: Invalid input file\n");
 		return 0;
 	}
@@ -86,42 +94,47 @@ int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N) {
 }
 
 /**
- * This funtion is to open a file .txt, read the file and save the characters of a line in a list
- * @param fp  Add a new FILE
- * @param line[128]  Save a 128 characters of a line of FILE
- * @param current, head  Point to a space in the list
- * @param node  Point to a space in the list
+ * Funcion que verifica la existencia de un archivo
+ * @param  file_name Direccion en la cual se verificara si hay un archivo.
+ * @return           0 - No existe el archivo. 1 - Existe el archivo
  */
-int openfile(char* file_name){
+int file_exists(char* file_name) {
+	//TODO: Reescribir funcion usando funcion access()
+	FILE* file = fopen(file_name, "r");
 
-    FILE *fp;
-    char line[128];
-    LIST *current, *head;
+	if (file){
+		fclose(file);
+		return 1;
+	}
+	else
+		return 0;
+}
 
-    head = current = NULL;
-    fp = fopen(file_name, "r");
+/**
+ * Exporta los numeros de un archivo de texto (un numero por linea) a una lista
+ * @param  file_name  archivo que sera abierto
+ * @return            puntero a la cabeza de una nueva lista que contiene los numeros del archivo. Null/0 si no habian numeros
+ */
+LIST* exportNumbers(char* file_name){
+	FILE *fp;
+  char line[10];
+  LIST *current, *head;
 
-    while(fgets(line, sizeof(line), fp)){
-        LIST *node = malloc(sizeof(LIST));     // MALLOC = This function returns a pointer to the allocated memory, or NULL if the request fails.
-        node->string = strdup(line);           // STRDUP = This function shall return a pointer to a new string on success.
-        node->next =NULL;
+  head = current = NULL;
+  fp = fopen(file_name, "r");
 
-        if(head == NULL){
-            current = head = node;
-        } else {
-            current = current->next = node;
-        }
-    }
-    fclose(fp);
+  while(fgets(line, sizeof(line), fp)){
+      LIST *node = malloc(sizeof(LIST));
+      node->n = atoi(line);
+      node->next =NULL;
 
-    /**
-     * This for function print the list to check that openfile is working
-     */
-    for(current = head; current ; current=current->next){
-        printf("%s", current->string);
-	//printf("%s", head->next->string);
+      if(head == NULL){
+          current = head = node;
+      } else {
+          current = current->next = node;
+      }
+  }
+  fclose(fp);
 
-    }
-    return 0;
-
+  return head;
 }
