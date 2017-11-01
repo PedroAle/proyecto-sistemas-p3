@@ -1,6 +1,6 @@
 primos.o: primos.c
-	gcc -c primos.c -o primos.o
-	gcc primos.o -o primos
+	gcc -c primos.c -o primos.o -lpthread
+	gcc primos.o -o primos -lpthread
 
 primos: primos.o
 	gcc primos.o -o primos

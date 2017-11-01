@@ -2,19 +2,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <pthread.h>
+#include "list.h"
 #define ARGS_GUIDE "Command: ./primos entrada.txt [-t | -p] [-n N]\n"
 #define INVALID_ARGS_MSG "./primos: First argument reserved for the input text file\n"
-
-struct list {
-    int n;
-    struct list *next;
-};
-
-typedef struct list LIST;
 
 int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N);
 int file_exists(char* file_name);
 LIST* exportNumbers(char* file_name);
+void dividirTrabajo(LIST* lista_Numeros, int numeroDeTrabajadores, LIST* work_pool[]);
 
 int main(int argc, char *argv[]) {
 	printf("Proyecto Sistemas de Operacion - Problema 1\n");
@@ -23,7 +19,7 @@ int main(int argc, char *argv[]) {
   que seria el primero en ser llamado
 	*/
 	int t_flag = 0, p_flag = 0;
-	int N = 0;
+	int numeroDeTrabajadores = 0;
 	char * archivo_entrada;
 	if (argc > 1) {
     //Aumentamos el indice optind para reservar el primer argumento para el archivo de texto de entrada
@@ -50,17 +46,41 @@ int main(int argc, char *argv[]) {
 				break;
 
 			case 'n':
-				N = atoi(optarg);
+				numeroDeTrabajadores = atoi(optarg);
 				break;
 		}
 	}
 
-	if (!validate_params(archivo_entrada, t_flag, p_flag, N))
+	if (!validate_params(archivo_entrada, t_flag, p_flag, numeroDeTrabajadores))
 		return 1;
 
-	printf("Good shit!\n");
 	LIST* lista_numeros = exportNumbers(archivo_entrada);
+	//Aqui guardamos las sublistas que le corresponde a cada thread/proceso
+	LIST* workpool[numeroDeTrabajadores];
+	dividirTrabajo(lista_numeros, numeroDeTrabajadores, workpool);
+
+	for (int i=0; i<numeroDeTrabajadores; i++) {
+		printf("-------  %d  ----------\n", i);
+		imprimirLista(workpool[i]);
+		limpiarLista(workpool[i]);
+	}
+
+	limpiarLista(lista_numeros);
 	return 0;
+}
+
+void dividirTrabajo(LIST* lista_numeros, int numeroDeTrabajadores, LIST* work_pool[]) {
+	int cantidadDeNumeros = numeroDeElementos(lista_numeros);
+	int numerosPorTrabajador = cantidadDeNumeros/numeroDeTrabajadores;
+  int numeroUltimoTrabajador = numerosPorTrabajador + cantidadDeNumeros % numeroDeTrabajadores;
+  //printf("Numeros P/T: %d\nUltimo Trabajador: %d\nTotal: %d\n", numerosPorTrabajador, numeroUltimoTrabajador,
+  //numeroDeTrabajadores-1)*numerosPorTrabajador+numeroUltimoTrabajador);
+  int lIndex = 0;
+  for (int i=0; i< numeroDeTrabajadores - 1; i++) {
+    work_pool[i] = subLista(lista_numeros, lIndex, lIndex+numerosPorTrabajador-1);
+    lIndex += numerosPorTrabajador;
+  }
+  work_pool[numeroDeTrabajadores-1] = subLista(lista_numeros,lIndex, lIndex+numeroUltimoTrabajador-1);
 }
 
 /**
@@ -97,7 +117,6 @@ int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N) {
  * @return           0 - No existe el archivo. 1 - Existe el archivo
  */
 int file_exists(char* file_name) {
-	//TODO: Reescribir funcion usando funcion access()
 	FILE* file = fopen(file_name, "r");
 
 	if (file){
