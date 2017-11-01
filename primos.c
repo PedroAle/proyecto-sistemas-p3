@@ -65,6 +65,12 @@ int main(int argc, char *argv[]) {
 		limpiarLista(workpool[i]);
 	}
 
+	if (t_flag) {
+		//CODIGO DE THREADS
+	} else if(p_flag) {
+		//CODIGO DE PROCESOS
+	}
+
 	limpiarLista(lista_numeros);
 	return 0;
 }
