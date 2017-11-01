@@ -3,19 +3,16 @@
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
+#include "list.h"
 #define ARGS_GUIDE "Command: ./primos entrada.txt [-t | -p] [-n N]\n"
 #define INVALID_ARGS_MSG "./primos: First argument reserved for the input text file\n"
 
-struct list {
-    int n;
-    struct list *next;
-};
-
-typedef struct list LIST;
 
 int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N);
 int file_exists(char* file_name);
 LIST* exportNumbers(char* file_name);
+LIST* getSublista(int start, int end, LIST* head);
+int numeroDeElementos(LIST* head);
 
 int main(int argc, char *argv[]) {
 	printf("Proyecto Sistemas de Operacion - Problema 1\n");
@@ -59,8 +56,8 @@ int main(int argc, char *argv[]) {
 	if (!validate_params(archivo_entrada, t_flag, p_flag, N))
 		return 1;
 
-	printf("Good shit!\n");
 	LIST* lista_numeros = exportNumbers(archivo_entrada);
+
 	return 0;
 }
 
