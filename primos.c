@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
   que seria el primero en ser llamado
 	*/
 	int t_flag = 0, p_flag = 0;
-	int N = 0;
+	int numeroDeTrabajadores = 0;
 	char * archivo_entrada;
 	if (argc > 1) {
     //Aumentamos el indice optind para reservar el primer argumento para el archivo de texto de entrada
@@ -48,15 +48,35 @@ int main(int argc, char *argv[]) {
 				break;
 
 			case 'n':
-				N = atoi(optarg);
+				numeroDeTrabajadores = atoi(optarg);
 				break;
 		}
 	}
 
-	if (!validate_params(archivo_entrada, t_flag, p_flag, N))
+	if (!validate_params(archivo_entrada, t_flag, p_flag, numeroDeTrabajadores))
 		return 1;
 
 	LIST* lista_numeros = exportNumbers(archivo_entrada);
+  int cantidadDeNumeros = numeroDeElementos(lista_numeros);
+  
+  //TODO: Cambiar esto a una funcion que devuelva el work_pool
+  int numerosPorTrabajador = cantidadDeNumeros/numeroDeTrabajadores;
+  int numeroUltimoTrabajador = numerosPorTrabajador + cantidadDeNumeros % numeroDeTrabajadores;
+  printf("Numeros P/T: %d\nUltimo Trabajador: %d\nTotal: %d\n", numerosPorTrabajador, numeroUltimoTrabajador,
+  (numeroDeTrabajadores-1)*numerosPorTrabajador+numeroUltimoTrabajador);
+
+  LIST* work_pool[numeroDeTrabajadores];
+  int lIndex = 0;
+  for (int i=0; i< numeroDeTrabajadores - 1; i++) {
+    //printf("lIndex: %d\n", lIndex);
+    work_pool[i] = subLista(lista_numeros, lIndex, lIndex+numerosPorTrabajador-1);
+    lIndex += numerosPorTrabajador;
+    printf("-------  %d  ----------\n", i);
+    imprimirLista(work_pool[i]);
+  }
+  printf("----- Ultimo trabajador -----\n");
+  work_pool[numeroDeTrabajadores-1] = subLista(lista_numeros,lIndex, lIndex+numeroUltimoTrabajador-1);
+  imprimirLista(work_pool[numeroDeTrabajadores-1]);
 
 	return 0;
 }
