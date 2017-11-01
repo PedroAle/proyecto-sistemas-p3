@@ -7,12 +7,10 @@
 #define ARGS_GUIDE "Command: ./primos entrada.txt [-t | -p] [-n N]\n"
 #define INVALID_ARGS_MSG "./primos: First argument reserved for the input text file\n"
 
-
 int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N);
 int file_exists(char* file_name);
 LIST* exportNumbers(char* file_name);
-LIST* getSublista(int start, int end, LIST* head);
-int numeroDeElementos(LIST* head);
+void dividirTrabajo(LIST* lista_Numeros, int numeroDeTrabajadores, LIST* work_pool[]);
 
 int main(int argc, char *argv[]) {
 	printf("Proyecto Sistemas de Operacion - Problema 1\n");
@@ -57,28 +55,32 @@ int main(int argc, char *argv[]) {
 		return 1;
 
 	LIST* lista_numeros = exportNumbers(archivo_entrada);
-  int cantidadDeNumeros = numeroDeElementos(lista_numeros);
+	//Aqui guardamos las sublistas que le corresponde a cada thread/proceso
+	LIST* workpool[numeroDeTrabajadores];
+	dividirTrabajo(lista_numeros, numeroDeTrabajadores, workpool);
 
-  //TODO: Cambiar esto a una funcion que devuelva el work_pool
-  int numerosPorTrabajador = cantidadDeNumeros/numeroDeTrabajadores;
+	for (int i=0; i<numeroDeTrabajadores; i++) {
+		printf("-------  %d  ----------\n", i);
+		imprimirLista(workpool[i]);
+		limpiarLista(workpool[i]);
+	}
+
+	limpiarLista(lista_numeros);
+	return 0;
+}
+
+void dividirTrabajo(LIST* lista_numeros, int numeroDeTrabajadores, LIST* work_pool[]) {
+	int cantidadDeNumeros = numeroDeElementos(lista_numeros);
+	int numerosPorTrabajador = cantidadDeNumeros/numeroDeTrabajadores;
   int numeroUltimoTrabajador = numerosPorTrabajador + cantidadDeNumeros % numeroDeTrabajadores;
-  printf("Numeros P/T: %d\nUltimo Trabajador: %d\nTotal: %d\n", numerosPorTrabajador, numeroUltimoTrabajador,
-  (numeroDeTrabajadores-1)*numerosPorTrabajador+numeroUltimoTrabajador);
-
-  LIST* work_pool[numeroDeTrabajadores];
+  //printf("Numeros P/T: %d\nUltimo Trabajador: %d\nTotal: %d\n", numerosPorTrabajador, numeroUltimoTrabajador,
+  //numeroDeTrabajadores-1)*numerosPorTrabajador+numeroUltimoTrabajador);
   int lIndex = 0;
   for (int i=0; i< numeroDeTrabajadores - 1; i++) {
-    //printf("lIndex: %d\n", lIndex);
     work_pool[i] = subLista(lista_numeros, lIndex, lIndex+numerosPorTrabajador-1);
     lIndex += numerosPorTrabajador;
-    printf("-------  %d  ----------\n", i);
-    imprimirLista(work_pool[i]);
   }
-  printf("----- Ultimo trabajador -----\n");
   work_pool[numeroDeTrabajadores-1] = subLista(lista_numeros,lIndex, lIndex+numeroUltimoTrabajador-1);
-  imprimirLista(work_pool[numeroDeTrabajadores-1]);
-
-	return 0;
 }
 
 /**
