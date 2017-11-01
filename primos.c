@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 
 	LIST* lista_numeros = exportNumbers(archivo_entrada);
   int cantidadDeNumeros = numeroDeElementos(lista_numeros);
-  
+
   //TODO: Cambiar esto a una funcion que devuelva el work_pool
   int numerosPorTrabajador = cantidadDeNumeros/numeroDeTrabajadores;
   int numeroUltimoTrabajador = numerosPorTrabajador + cantidadDeNumeros % numeroDeTrabajadores;
@@ -152,4 +152,40 @@ LIST* exportNumbers(char* file_name){
   fclose(fp);
 
   return head;
+}
+
+void output(LIST *head){
+
+    LIST *current;
+    current = head;
+
+    FILE *fptr;
+    int n, c = 2, op=1;
+
+    /*  open for writing */
+    fptr = fopen("primes.txt", "w");
+
+    if (fptr == NULL){
+        printf("File does not exists \n");
+        return;
+    }
+
+    while (current){
+
+			n = current->n;
+
+    for ( c = 2 ; c <= n - 1 ; c++ ){
+
+        if ( n%c == 0 ){
+            break;
+        }
+
+    }
+       if ( c == n )
+          fprintf(fptr, "%d\n", current->n);
+
+      current = current->next;
+
+    }
+    fclose(fptr);
 }
