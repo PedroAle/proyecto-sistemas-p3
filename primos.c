@@ -11,6 +11,9 @@ int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N);
 int file_exists(char* file_name);
 LIST* exportNumbers(char* file_name);
 void dividirTrabajo(LIST* lista_Numeros, int numeroDeTrabajadores, Work* work_pool[]);
+void* doWork(void* work);
+void liberarWorkPool(Work* work_pool[], int array_length);
+int isPrimo(int n);
 
 int main(int argc, char *argv[]) {
 	printf("Proyecto Sistemas de Operacion - Problema 1\n");
@@ -56,23 +59,62 @@ int main(int argc, char *argv[]) {
 
 	LIST* lista_numeros = exportNumbers(archivo_entrada);
 	//Aqui guardamos las sublistas que le corresponde a cada thread/proceso
-	Work* workpool[numeroDeTrabajadores];
-	dividirTrabajo(lista_numeros, numeroDeTrabajadores, workpool);
-
-	for (int i=0; i<numeroDeTrabajadores; i++) {
-		printf("-------  %d  ----------\n", i);
-		imprimirLista(workpool[i]->toProcess);
-		liberarTrabajo(workpool[i]);
-	}
+	Work* work_pool[numeroDeTrabajadores];
+	dividirTrabajo(lista_numeros, numeroDeTrabajadores, work_pool);
 
 	if (t_flag) {
-		//CODIGO DE THREADS
+		pthread_t thread[numeroDeTrabajadores];
+		for (int i=0; i< numeroDeTrabajadores; i++) {
+			pthread_create(&thread[i],NULL, doWork, work_pool[i]);
+		}
+
+		for (int i=0; i< numeroDeTrabajadores; i++) {
+			pthread_join(thread[i], NULL);
+		}
 	} else if(p_flag) {
 		//CODIGO DE PROCESOS
 	}
 
 	liberarLista(lista_numeros);
+	liberarWorkPool(work_pool, numeroDeTrabajadores);
 	return 0;
+}
+
+/**
+ * Procesa la lista de numeros de un trabajo guardando el resultado en un nuevo archivo de texto
+ * cuyo nombre es igual al del id del work.
+ * Es llamada por cada thread/proceso con su Work
+ * @param  work   Estructura que almacena la lista de numeros a procesar y el identificador del thread/proceso
+ */
+void* doWork(void* work) {
+	LIST* numbers = ((Work*) work)->toProcess;
+	printf("Trabajador %d - Comenzado\n", ((Work*) work)->id);
+	//imprimirLista(numbers);
+
+	LIST* primosHead = NULL, *primosAux = NULL;
+	LIST* aux = numbers;
+	while (aux) {
+		if (isPrimo(aux->n)) {
+			//Creamos la primera casilla de la lista que lamacenara los numeros primos
+			if (!primosHead) {
+				primosHead = crearNodo(aux->n, NULL);
+				primosAux = primosHead;
+			} else {
+				//Si ya esta creada la lista de primos, vamos agregando los nuevos elementos
+				LIST* nCasilla = crearNodo(aux->n,NULL);
+				primosAux->next = nCasilla;
+				primosAux = nCasilla;
+			}
+		}
+		aux = aux->next;
+	}
+
+	//printf("Primos: \n");
+	//imprimirLista(primosHead);
+	//TODO: Hacer que se guarde en su archivo
+	//output(primosHead, ((Work*) work)->id);
+	liberarLista(primosHead);
+	printf("Trabajador %d - Completado\n", ((Work*) work)->id);
 }
 
 /**
@@ -122,22 +164,6 @@ int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N) {
 	}
 
 	return 1;
-}
-
-/**
- * Funcion que verifica la existencia de un archivo
- * @param  file_name Direccion en la cual se verificara si hay un archivo.
- * @return           0 - No existe el archivo. 1 - Existe el archivo
- */
-int file_exists(char* file_name) {
-	FILE* file = fopen(file_name, "r");
-
-	if (file){
-		fclose(file);
-		return 1;
-	}
-	else
-		return 0;
 }
 
 /**
@@ -203,4 +229,48 @@ void output(LIST *head){
 
     }
     fclose(fptr);
+}
+
+/**
+ * Libera la memoria ocupada por un arreglo de tipo Work*
+ * @param  work_pool       Arreglo de Work* a ser liberado
+ * @param  array_length    Longitud del arreglo
+ */
+void liberarWorkPool(Work* work_pool[], int array_length) {
+	for (int i=0; i < array_length; i++) {
+		liberarTrabajo(work_pool[i]);
+	}
+}
+
+/**
+ * Determina si un numero es primo o no
+ * @param  n       Numero a ser definido como primo o no.
+ * @return         1 / 0  = Primo / No primo
+ */
+int isPrimo(int n){
+	int c = 2;
+	for ( c = 2 ; c <= n - 1 ; c++ ){
+			if ( n%c == 0 ){
+					break;
+			}
+	}
+
+	if ( c == n )
+		 return 1;
+}
+
+/**
+ * Funcion que verifica la existencia de un archivo
+ * @param  file_name Direccion en la cual se verificara si hay un archivo.
+ * @return           0 - No existe el archivo. 1 - Existe el archivo
+ */
+int file_exists(char* file_name) {
+	FILE* file = fopen(file_name, "r");
+
+	if (file){
+		fclose(file);
+		return 1;
+	}
+	else
+		return 0;
 }
