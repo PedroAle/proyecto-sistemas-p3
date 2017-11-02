@@ -237,7 +237,7 @@ void output(LIST *head, int n){
 			mkdir(RESULTS_FOLDER,0700);
 		}
 
-		sprintf(str, "%s%d", RESULTS_FOLDER, n);
+		sprintf(str, "%s%d.txt", RESULTS_FOLDER, n);
     fptr = fopen(str, "w");
 
     while (current){
