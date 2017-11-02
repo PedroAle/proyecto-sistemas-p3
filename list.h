@@ -5,6 +5,12 @@ struct list {
 
 typedef struct list LIST;
 
+LIST* crearNodo(int n, LIST* next) {
+  LIST* nList = malloc(sizeof(LIST));
+  nList->n = n;
+  nList->next = next;
+}
+
 /**
  * Imprime en consola el valor de los nodos pertenecientes a una lista.
  * @param  head          Puntero a la cabeza de la lista.
