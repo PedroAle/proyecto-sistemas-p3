@@ -21,7 +21,7 @@ void imprimirLista(LIST* head) {
  * Libera la memoria de los elementos de una lista.
  * @param  head         Nodo a partir del cual se liberara memoria.
  */
-void limpiarLista(LIST* head) {
+void liberarLista(LIST* head) {
   LIST* aux;
   while (head) {
     aux = head;
@@ -94,7 +94,7 @@ LIST* subLista(LIST* head, int start, int end) {
       lastNode = lastNode->next;
     }
   }
-  limpiarLista(lastNode->next);
+  liberarLista(lastNode->next);
   lastNode->next = NULL;
 
   return dupLista;

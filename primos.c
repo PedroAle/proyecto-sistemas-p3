@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 #include <pthread.h>
 #include "list.h"
+#include "work.h"
 #define ARGS_GUIDE "Command: ./primos entrada.txt [-t | -p] [-n N]\n"
 #define INVALID_ARGS_MSG "./primos: First argument reserved for the input text file\n"
 
 int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N);
 int file_exists(char* file_name);
 LIST* exportNumbers(char* file_name);
-void dividirTrabajo(LIST* lista_Numeros, int numeroDeTrabajadores, LIST* work_pool[]);
+void dividirTrabajo(LIST* lista_Numeros, int numeroDeTrabajadores, Work* work_pool[]);
 
 int main(int argc, char *argv[]) {
 	printf("Proyecto Sistemas de Operacion - Problema 1\n");
@@ -56,13 +56,13 @@ int main(int argc, char *argv[]) {
 
 	LIST* lista_numeros = exportNumbers(archivo_entrada);
 	//Aqui guardamos las sublistas que le corresponde a cada thread/proceso
-	LIST* workpool[numeroDeTrabajadores];
+	Work* workpool[numeroDeTrabajadores];
 	dividirTrabajo(lista_numeros, numeroDeTrabajadores, workpool);
 
 	for (int i=0; i<numeroDeTrabajadores; i++) {
 		printf("-------  %d  ----------\n", i);
-		imprimirLista(workpool[i]);
-		limpiarLista(workpool[i]);
+		imprimirLista(workpool[i]->toProcess);
+		liberarTrabajo(workpool[i]);
 	}
 
 	if (t_flag) {
@@ -71,11 +71,17 @@ int main(int argc, char *argv[]) {
 		//CODIGO DE PROCESOS
 	}
 
-	limpiarLista(lista_numeros);
+	liberarLista(lista_numeros);
 	return 0;
 }
 
-void dividirTrabajo(LIST* lista_numeros, int numeroDeTrabajadores, LIST* work_pool[]) {
+/**
+ * Divide una lista de numeros equitativamente entre una determinada cantidad de trabajadores.
+ * @param  lista_numeros        Cabeza de la lista que sera dividida.
+ * @param  numeroDeTrabajadores Cantidad de trabajadores que recibiran parte de la lista_numeros
+ * @param  work_pool            Variable donde se almacenara el resultado de la division
+ */
+void dividirTrabajo(LIST* lista_numeros, int numeroDeTrabajadores, Work* work_pool[]) {
 	int cantidadDeNumeros = numeroDeElementos(lista_numeros);
 	int numerosPorTrabajador = cantidadDeNumeros/numeroDeTrabajadores;
   int numeroUltimoTrabajador = numerosPorTrabajador + cantidadDeNumeros % numeroDeTrabajadores;
@@ -83,10 +89,11 @@ void dividirTrabajo(LIST* lista_numeros, int numeroDeTrabajadores, LIST* work_po
   //numeroDeTrabajadores-1)*numerosPorTrabajador+numeroUltimoTrabajador);
   int lIndex = 0;
   for (int i=0; i< numeroDeTrabajadores - 1; i++) {
-    work_pool[i] = subLista(lista_numeros, lIndex, lIndex+numerosPorTrabajador-1);
+    LIST* numbers = subLista(lista_numeros, lIndex, lIndex+numerosPorTrabajador-1);
+		work_pool[i] = crearTrabajo(numbers, i);
     lIndex += numerosPorTrabajador;
   }
-  work_pool[numeroDeTrabajadores-1] = subLista(lista_numeros,lIndex, lIndex+numeroUltimoTrabajador-1);
+    work_pool[numeroDeTrabajadores-1] = crearTrabajo(subLista(lista_numeros,lIndex, lIndex+numeroUltimoTrabajador-1), numeroDeTrabajadores-1);
 }
 
 /**
