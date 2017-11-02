@@ -19,7 +19,7 @@ void dividirTrabajo(LIST* lista_Numeros, int numeroDeTrabajadores, Work* work_po
 void* doWork(void* work);
 void liberarWorkPool(Work* work_pool[], int array_length);
 int isPrimo(int n);
-void output(LIST *head, int n);
+void output(LIST *head,LIST *aHead, int n);
 
 int main(int argc, char *argv[]) {
 	printf("Proyecto Sistemas de Operacion - Problema 1\n");
@@ -118,25 +118,48 @@ void* doWork(void* work) {
 	LIST* numbers = ((Work*) work)->toProcess;
 	printf("Trabajador %d - Comenzado\n", ((Work*) work)->id);
 
-	LIST* primosHead = NULL, *primosAux = NULL;
+	LIST* primosHead = NULL, *primosAux = NULL, *pHead = NULL, *pAux = NULL;
 	LIST* aux = numbers;
+
 	while (aux) {
 		if (isPrimo(aux->n)) {
-			//Creamos la primera casilla de la lista que lamacenara los numeros primos
-			if (!primosHead) {
+			//Creamos la primera casilla de la lista que almacenara los numeros primos
+			if ((!primosHead)&&(!pHead)) {
 				primosHead = crearNodo(aux->n, NULL);
+				pHead = crearNodo(1, NULL);
 				primosAux = primosHead;
+				pAux = pHead;
 			} else {
 				//Si ya esta creada la lista de primos, vamos agregando los nuevos elementos
 				LIST* nCasilla = crearNodo(aux->n,NULL);
+				LIST* Primo = crearNodo(1,NULL);
 				primosAux->next = nCasilla;
+				pAux->next = Primo;
 				primosAux = nCasilla;
+				pAux = Primo;
 			}
+		}else{
+
+			if ((!primosHead)&&(!pHead)) {
+				primosHead = crearNodo(aux->n, NULL);
+				pHead = crearNodo(0, NULL);
+				primosAux = primosHead;
+				pAux = pHead;
+			} else {
+				//Si ya esta creada la lista de primos, vamos agregando los nuevos elementos
+				LIST* nCasilla = crearNodo(aux->n,NULL);
+				LIST* nPrimo = crearNodo(0,NULL);
+				primosAux->next = nCasilla;
+				pAux->next = nPrimo;
+				primosAux = nCasilla;
+				pAux = nPrimo;
+			}
+
 		}
 		aux = aux->next;
 	}
 	//Guardamos el resultado en un archivo de texto
-	output(primosHead, ((Work*) work)->id);
+	output(primosHead,pHead, ((Work*) work)->id);
 	liberarLista(primosHead);
 	printf("Trabajador %d - Completado\n", ((Work*) work)->id);
 }
@@ -224,11 +247,12 @@ LIST* exportNumbers(char* file_name){
  * @param  head   Cabeza de la lista a imprimir.
  * @param  n      Numero que sera el nombre del archivo.
  */
-void output(LIST *head, int n){
+void output(LIST *head, LIST *aHead, int n){
 		struct stat st = {0};
 
-    LIST *current;
+    LIST *current, *acurrent;
     current = head;
+		acurrent = aHead;
 		char str[80];
 
     FILE *fptr;
@@ -240,9 +264,11 @@ void output(LIST *head, int n){
 		sprintf(str, "%s%d.txt", RESULTS_FOLDER, n);
     fptr = fopen(str, "w");
 
-    while (current){
-			fprintf(fptr, "%d\n", current->n);
+    while ((current)&&(acurrent)){
+			fprintf(fptr, "%d %d\n", current->n, acurrent->n);
 			current = current->next;
+			acurrent = acurrent->next;
+
     }
 
     fclose(fptr);
@@ -266,7 +292,7 @@ void liberarWorkPool(Work* work_pool[], int array_length) {
  */
 int isPrimo(int n){
 	if (n == 1)
-		return 1;
+		return 0;
 
 	if (n == 0)
 		return 0;
