@@ -2,10 +2,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "list.h"
 #include "work.h"
+
 #define ARGS_GUIDE "Command: ./primos entrada.txt [-t | -p] [-n N]\n"
 #define INVALID_ARGS_MSG "./primos: First argument reserved for the input text file\n"
+#define RESULTS_FOLDER "Resultados/"
 
 int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N);
 int file_exists(char* file_name);
@@ -14,6 +19,7 @@ void dividirTrabajo(LIST* lista_Numeros, int numeroDeTrabajadores, Work* work_po
 void* doWork(void* work);
 void liberarWorkPool(Work* work_pool[], int array_length);
 int isPrimo(int n);
+void output(LIST *head, int n);
 
 int main(int argc, char *argv[]) {
 	printf("Proyecto Sistemas de Operacion - Problema 1\n");
@@ -23,6 +29,7 @@ int main(int argc, char *argv[]) {
 	*/
 	int t_flag = 0, p_flag = 0;
 	int numeroDeTrabajadores = 0;
+	int i;
 	char * archivo_entrada;
 	if (argc > 1) {
     //Aumentamos el indice optind para reservar el primer argumento para el archivo de texto de entrada
@@ -62,6 +69,7 @@ int main(int argc, char *argv[]) {
 	Work* work_pool[numeroDeTrabajadores];
 	dividirTrabajo(lista_numeros, numeroDeTrabajadores, work_pool);
 
+	int creador = -1;
 	if (t_flag) {
 		pthread_t thread[numeroDeTrabajadores];
 		for (int i=0; i< numeroDeTrabajadores; i++) {
@@ -72,7 +80,27 @@ int main(int argc, char *argv[]) {
 			pthread_join(thread[i], NULL);
 		}
 	} else if(p_flag) {
-		//CODIGO DE PROCESOS
+		int pid;
+		//Creamos todos los procesos
+		for(i=0;i<numeroDeTrabajadores;i++){
+				pid = fork();
+				if(pid < 0)
+				{
+						 perror("Fork error\n");
+						 exit(1);
+				}
+				else if (pid==0) //Si es el proceso hijo, realiza su trabajo y luego sale del ciclo para que no cree mas hijos
+				{
+						doWork(work_pool[i]);
+						break;
+				} else {
+					creador = 1;
+				}
+		}
+	}
+
+	if (creador) {
+		wait(NULL);
 	}
 
 	liberarLista(lista_numeros);
@@ -89,7 +117,6 @@ int main(int argc, char *argv[]) {
 void* doWork(void* work) {
 	LIST* numbers = ((Work*) work)->toProcess;
 	printf("Trabajador %d - Comenzado\n", ((Work*) work)->id);
-	//imprimirLista(numbers);
 
 	LIST* primosHead = NULL, *primosAux = NULL;
 	LIST* aux = numbers;
@@ -108,11 +135,8 @@ void* doWork(void* work) {
 		}
 		aux = aux->next;
 	}
-
-	//printf("Primos: \n");
-	//imprimirLista(primosHead);
-	//TODO: Hacer que se guarde en su archivo
-	//output(primosHead, ((Work*) work)->id);
+	//Guardamos el resultado en un archivo de texto
+	output(primosHead, ((Work*) work)->id);
 	liberarLista(primosHead);
 	printf("Trabajador %d - Completado\n", ((Work*) work)->id);
 }
@@ -147,7 +171,6 @@ void dividirTrabajo(LIST* lista_numeros, int numeroDeTrabajadores, Work* work_po
  * @return  								 0 - Input invalido. 1 - Input valido.
  */
 int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N) {
-	//TODO: Validar que el archivo de entrada exista
 	if (!file_exists(archivo_entrada)){
 		printf("./primos: Invalid input file\n");
 		return 0;
@@ -195,39 +218,33 @@ LIST* exportNumbers(char* file_name){
   return head;
 }
 
-void output(LIST *head){
+/**
+ * Imprime la lista que recibe en un nuevo archivo de texto cuyo nombre viene dado por el parametro n.
+ * @method output
+ * @param  head   Cabeza de la lista a imprimir.
+ * @param  n      Numero que sera el nombre del archivo.
+ */
+void output(LIST *head, int n){
+		struct stat st = {0};
 
     LIST *current;
     current = head;
+		char str[80];
 
     FILE *fptr;
-    int n, c = 2, op=1;
 
-    /*  open for writing */
-    fptr = fopen("primes.txt", "w");
+		if (stat(RESULTS_FOLDER, &st )== -1){
+			mkdir(RESULTS_FOLDER,0700);
+		}
 
-    if (fptr == NULL){
-        printf("File does not exists \n");
-        return;
-    }
+		sprintf(str, "%s%d", RESULTS_FOLDER, n);
+    fptr = fopen(str, "w");
 
     while (current){
-
-			n = current->n;
-
-    for ( c = 2 ; c <= n - 1 ; c++ ){
-
-        if ( n%c == 0 ){
-            break;
-        }
-
+			fprintf(fptr, "%d\n", current->n);
+			current = current->next;
     }
-       if ( c == n )
-          fprintf(fptr, "%d\n", current->n);
 
-      current = current->next;
-
-    }
     fclose(fptr);
 }
 
@@ -248,15 +265,24 @@ void liberarWorkPool(Work* work_pool[], int array_length) {
  * @return         1 / 0  = Primo / No primo
  */
 int isPrimo(int n){
-	int c = 2;
-	for ( c = 2 ; c <= n - 1 ; c++ ){
-			if ( n%c == 0 ){
-					break;
-			}
+	if (n == 1)
+		return 1;
+
+	if (n == 0)
+		return 0;
+
+	//Siempre sera divisible entre el 1
+	int divisores = 1;
+
+	for (int i = 2; i <= n; i++) {
+		if (n % i == 0)
+			divisores++;
+
+		if (divisores > 2)
+			return 0;
 	}
 
-	if ( c == n )
-		 return 1;
+	return 1;
 }
 
 /**
