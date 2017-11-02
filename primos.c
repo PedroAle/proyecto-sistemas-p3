@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "list.h"
 #include "work.h"
 #define ARGS_GUIDE "Command: ./primos entrada.txt [-t | -p] [-n N]\n"
@@ -23,6 +25,7 @@ int main(int argc, char *argv[]) {
 	*/
 	int t_flag = 0, p_flag = 0;
 	int numeroDeTrabajadores = 0;
+	int i;
 	char * archivo_entrada;
 	if (argc > 1) {
     //Aumentamos el indice optind para reservar el primer argumento para el archivo de texto de entrada
@@ -72,7 +75,25 @@ int main(int argc, char *argv[]) {
 			pthread_join(thread[i], NULL);
 		}
 	} else if(p_flag) {
-		//CODIGO DE PROCESOS
+		for(i=0;i<numeroDeTrabajadores;i++){
+				pid_t pid=fork();
+				if(pid < 0)
+				{
+						 perror("Fork error\n");
+						 return 1;
+				}
+				else if (pid==0) /* child */
+				{
+						doWork(work_pool[i]);
+				}
+				else /* parrent */
+				{
+						int returnStatus;
+						waitpid(pid, &returnStatus, 0);  // Parent process waits for child to terminate.
+						exit(0);
+				}
+
+		}
 	}
 
 	liberarLista(lista_numeros);
@@ -112,7 +133,7 @@ void* doWork(void* work) {
 	//printf("Primos: \n");
 	//imprimirLista(primosHead);
 	//TODO: Hacer que se guarde en su archivo
-	//output(primosHead, ((Work*) work)->id);
+	output(primosHead, ((Work*) work)->id);
 	liberarLista(primosHead);
 	printf("Trabajador %d - Completado\n", ((Work*) work)->id);
 }
@@ -195,16 +216,23 @@ LIST* exportNumbers(char* file_name){
   return head;
 }
 
-void output(LIST *head){
+void output(LIST *head, int n){
+
+		struct stat st = {0};
 
     LIST *current;
     current = head;
+		char str[80];
 
     FILE *fptr;
-    int n, c = 2, op=1;
+
+		if (stat("Resultados", &st)==-1){
+			mkdir("Resultados",0700);
+		}
 
     /*  open for writing */
-    fptr = fopen("primes.txt", "w");
+		sprintf(str, "Resultados/Proceso%d", n);
+    fptr = fopen(str, "w");
 
     if (fptr == NULL){
         printf("File does not exists \n");
@@ -213,19 +241,9 @@ void output(LIST *head){
 
     while (current){
 
-			n = current->n;
+			fprintf(fptr, "%d\n", current->n);
+			current = current->next;
 
-    for ( c = 2 ; c <= n - 1 ; c++ ){
-
-        if ( n%c == 0 ){
-            break;
-        }
-
-    }
-       if ( c == n )
-          fprintf(fptr, "%d\n", current->n);
-
-      current = current->next;
 
     }
     fclose(fptr);
