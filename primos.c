@@ -57,6 +57,10 @@ int main(int argc, char *argv[]) {
 
 			case 'n':
 				numeroDeTrabajadores = atoi(optarg);
+				if (numeroDeTrabajadores > 10 || numeroDeTrabajadores < 1) {
+					printf("./primos: 1 <= N <= 10\n");
+					return 1;
+				}
 				break;
 		}
 	}
