@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
 	*/
 	int t_flag = 0, p_flag = 0;
 	int numeroDeTrabajadores = 0;
-	int i;
 	char * archivo_entrada;
+
 	if (argc > 1) {
     //Aumentamos el indice optind para reservar el primer argumento para el archivo de texto de entrada
     optind = 2;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 	} else if(p_flag) {
 		int pid;
 		//Creamos todos los procesos
-		for(i=0;i<numeroDeTrabajadores;i++){
+		for(int i=0;i<numeroDeTrabajadores;i++){
 				pid = fork();
 				if(pid < 0)
 				{
