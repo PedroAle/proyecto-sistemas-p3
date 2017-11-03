@@ -118,49 +118,27 @@ void* doWork(void* work) {
 	LIST* numbers = ((Work*) work)->toProcess;
 	printf("Trabajador %d - Comenzado\n", ((Work*) work)->id);
 
-	LIST* primosHead = NULL, *primosAux = NULL, *pHead = NULL, *pAux = NULL;
+	LIST* pHead = NULL, *pAux = NULL, *isPrimoNode = NULL;
 	LIST* aux = numbers;
 
 	while (aux) {
-		if (isPrimo(aux->n)) {
-			//Creamos la primera casilla de la lista que almacenara los numeros primos
-			if ((!primosHead)&&(!pHead)) {
-				primosHead = crearNodo(aux->n, NULL);
-				pHead = crearNodo(1, NULL);
-				primosAux = primosHead;
-				pAux = pHead;
-			} else {
-				//Si ya esta creada la lista de primos, vamos agregando los nuevos elementos
-				LIST* nCasilla = crearNodo(aux->n,NULL);
-				LIST* Primo = crearNodo(1,NULL);
-				primosAux->next = nCasilla;
-				pAux->next = Primo;
-				primosAux = nCasilla;
-				pAux = Primo;
-			}
-		}else{
+		if (isPrimo(aux->n))
+		 	isPrimoNode = crearNodo(1, NULL);
+		else
+			isPrimoNode = crearNodo(0, NULL);
 
-			if ((!primosHead)&&(!pHead)) {
-				primosHead = crearNodo(aux->n, NULL);
-				pHead = crearNodo(0, NULL);
-				primosAux = primosHead;
-				pAux = pHead;
-			} else {
-				//Si ya esta creada la lista de primos, vamos agregando los nuevos elementos
-				LIST* nCasilla = crearNodo(aux->n,NULL);
-				LIST* nPrimo = crearNodo(0,NULL);
-				primosAux->next = nCasilla;
-				pAux->next = nPrimo;
-				primosAux = nCasilla;
-				pAux = nPrimo;
-			}
-
+		if (!pHead) {
+			pHead = isPrimoNode;
+			pAux = pHead;
+		} else {
+			pAux->next = isPrimoNode;
+			pAux = isPrimoNode;
 		}
 		aux = aux->next;
 	}
 	//Guardamos el resultado en un archivo de texto
-	output(primosHead,pHead, ((Work*) work)->id);
-	liberarLista(primosHead);
+	output(numbers,pHead, ((Work*) work)->id);
+	liberarLista(pHead);
 	printf("Trabajador %d - Completado\n", ((Work*) work)->id);
 }
 
