@@ -1,11 +1,16 @@
 #!/bin/bash
-filename="Resultados/Time/$1$2.txt"
 
-echo Timepo guardado en: $filename
+mkdir Resultados
 cd Resultados
 mkdir Time
 cd ..
 
-for i in `seq 1 10`; do
-  (time ./primos entrada.txt -$1 -n $2) 2>> $filename
+for j in `seq 1 10`; do
+  printf "\nNumero de procesos: $j\n"
+
+    for i in `seq 1 10`; do
+      printf "\nCorrida $i\n"
+      echo "-------- $i ---------" >> "Resultados/Time/$2$j.txt" #$filename
+      (time ./primos "$1" -$2 -n $j) 2>> "Resultados/Time/$2$j.txt"
+    done
 done

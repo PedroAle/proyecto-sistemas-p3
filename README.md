@@ -6,7 +6,7 @@ Programa que recibe como entrada una lista de N enteros positivos n0, n1, ..., n
 
 `primos entrada.txt [-t | -p] [-n N]`
 
-* entrada.txt es el nombre de archivo de entrada
+* `entrada.txt` es el nombre de archivo de entrada
 * `-p` o `-t` indican que el programa deberá utilizar procesos o hilos, respectivamente.
 * `N` es el número de procesos/hilos a crear. Siempre se debe cumplir 1 ≤ N ≤ 10
 * El archivo de entrada es un archivo de texto donde cada línea tendrá un entero positivo. El archivo termina en fin de línea.
@@ -14,10 +14,11 @@ Programa que recibe como entrada una lista de N enteros positivos n0, n1, ..., n
 
 ## Medir tiempo
 
-`./medir_tiempo.sh [t | p] N`
+`./medir_tiempo.sh entrada.txt [t | p]`
 
+* `entrada.txt` es el nombre de archivo de entrada
 * `t` o `p` para threads o procesos (Nota: no lleva `-` antes de la letra)
-* `N` es el número de procesos/hilos a crear
 
-Este script llamara al programa `primos` con un archivo llamado `input.txt` donde deben estar los numeros, por lo que se debe guardar el archivo de prueba como `input.txt` para que el script funcione.
-Genera un archivo de texto llama `[t | p]N.txt` que contiene los tiempos medidos con la instruccion `time`
+Este script correra el, programa `primos` 10 veces de 1 a 10 threads.
+
+Crea una carpeta `Resultados/Time` y dentro de esta guarda todos lo resultados de tiempo de 10 corridas con N procesos.

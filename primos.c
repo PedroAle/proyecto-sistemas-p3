@@ -91,13 +91,14 @@ int main(int argc, char *argv[]) {
 				if(pid < 0)
 				{
 						 perror("Fork error\n");
+						 liberarLista(lista_numeros);
+					 	 liberarWorkPool(work_pool, numeroDeTrabajadores);
 						 exit(1);
 				}
 				else if (pid==0) //Si es el proceso hijo, realiza su trabajo y luego sale del ciclo para que no cree mas hijos
 				{
 						doWork(work_pool[i]);
-						exit(0);
-						//break;
+						break;
 				}
 		}
 	}
