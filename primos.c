@@ -96,16 +96,15 @@ int main(int argc, char *argv[]) {
 				else if (pid==0) //Si es el proceso hijo, realiza su trabajo y luego sale del ciclo para que no cree mas hijos
 				{
 						doWork(work_pool[i]);
-						break;
-				} else {
-					creador = 1;
+						exit(0);
+						//break;
 				}
 		}
 	}
 
-	if (creador) {
-		wait(NULL);
-	}
+	//Padre espera por todos los hijos
+	while (wait(NULL) > 0);
+
 
 	liberarLista(lista_numeros);
 	liberarWorkPool(work_pool, numeroDeTrabajadores);

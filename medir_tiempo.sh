@@ -7,5 +7,5 @@ mkdir Time
 cd ..
 
 for i in `seq 1 10`; do
-  (time ./primos input.txt -$1 -n $2) 2>> $filename
+  (time ./primos entrada.txt -$1 -n $2) 2>> $filename
 done
