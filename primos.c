@@ -318,9 +318,9 @@ int file_exists(char* file_name) {
 void sig_handler(int signo){
 	if (signo == SIGINT)
 			printf("I'm sorry Dave. I'm afraid I can't do that\n");
-			signal(SIGINT,anotherprint);
+			signal(SIGINT,NULL); // aqui es donde se llama a anotherprint
 }
 
-void anotherprint(){
+void anotherprint(){ //llamar a esta funcion para no interumpir el proceso
 	printf(" ");
 }
