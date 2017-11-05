@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <signal.h>
 #include "list.h"
 #include "work.h"
 
@@ -20,9 +21,11 @@ void* doWork(void* work);
 void liberarWorkPool(Work* work_pool[], int array_length);
 int isPrimo(int n);
 void output(LIST *head,LIST *aHead, int n);
+void sig_handler(int signo);
+void anotherprint();
 
 int main(int argc, char *argv[]) {
-	printf("Proyecto Sistemas de Operacion - Problema 1\n");
+	printf("Proyecto Sistemas de Operacion - Problema 3\n");
 	/*
 	Estos flags permiten determinar un solo modo (-t o -p) en caso de que se llame -tp | -pt | - t - p | etc,
   que seria el primero en ser llamado
@@ -85,9 +88,12 @@ int main(int argc, char *argv[]) {
 		}
 	} else if(p_flag) {
 		int pid;
+		signal(SIGINT, sig_handler);
+
 		//Creamos todos los procesos
 		for(int i=0;i<numeroDeTrabajadores;i++){
 				pid = fork();
+
 				if(pid < 0)
 				{
 						 perror("Fork error\n");
@@ -307,4 +313,14 @@ int file_exists(char* file_name) {
 	}
 	else
 		return 0;
+}
+
+void sig_handler(int signo){
+	if (signo == SIGINT)
+			printf("I'm sorry Dave. I'm afraid I can't do that\n");
+			signal(SIGINT,anotherprint);
+}
+
+void anotherprint(){
+	printf(" ");
 }
