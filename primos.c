@@ -21,8 +21,8 @@ void* doWork(void* work);
 void liberarWorkPool(Work* work_pool[], int array_length);
 int isPrimo(int n);
 void output(LIST *head,LIST *aHead, int n);
-void sig_handler(int signo);
-void anotherprint();
+void sign_handler();
+void doNothing();
 
 int main(int argc, char *argv[]) {
 	printf("Proyecto Sistemas de Operacion - Problema 3\n");
@@ -87,26 +87,26 @@ int main(int argc, char *argv[]) {
 			pthread_join(thread[i], NULL);
 		}
 	} else if(p_flag) {
+		signal(SIGINT, doNothing);
 		int pid;
-		signal(SIGINT, sig_handler);
+			//Creamos todos los procesos
+			for(int i=0;i<numeroDeTrabajadores;i++){
+					pid = fork();
+					if(pid < 0)
+					{
+							 perror("Fork error\n");
+							 liberarLista(lista_numeros);
+						 	 liberarWorkPool(work_pool, numeroDeTrabajadores);
+							 exit(1);
+					}
+					else if (pid==0) //Si es el proceso hijo, realiza su trabajo y luego sale del ciclo para que no cree mas hijos
+					{
+							doWork(work_pool[i]);
+							break;
+					}
+			}
 
-		//Creamos todos los procesos
-		for(int i=0;i<numeroDeTrabajadores;i++){
-				pid = fork();
-
-				if(pid < 0)
-				{
-						 perror("Fork error\n");
-						 liberarLista(lista_numeros);
-					 	 liberarWorkPool(work_pool, numeroDeTrabajadores);
-						 exit(1);
-				}
-				else if (pid==0) //Si es el proceso hijo, realiza su trabajo y luego sale del ciclo para que no cree mas hijos
-				{
-						doWork(work_pool[i]);
-						break;
-				}
-		}
+			signal(SIGINT, sign_handler);
 	}
 
 	//Padre espera por todos los hijos
@@ -315,12 +315,11 @@ int file_exists(char* file_name) {
 		return 0;
 }
 
-void sig_handler(int signo){
-	if (signo == SIGINT)
-			printf("I'm sorry Dave. I'm afraid I can't do that\n");
-			signal(SIGINT,NULL); // aqui es donde se llama a anotherprint
+void sign_handler(){
+		printf("I'm sorry Dave. I'm afraid I can't do that\n");
+		//Si queremos que se imprima una sola vez en toda la ejecucion del programa, cambiar sign_handler a doNothing
+		signal(SIGINT,sign_handler);
 }
 
-void anotherprint(){ //llamar a esta funcion para no interumpir el proceso
-	printf(" ");
+void doNothing(){
 }
