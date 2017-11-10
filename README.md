@@ -21,4 +21,4 @@ Programa que recibe como entrada una lista de N enteros positivos n0, n1, ..., n
 
 Este script correra el, programa `primos` 10 veces de 1 a 10 threads.
 
-Crea una carpeta `Resultados/Time` y dentro de esta guarda todos lo resultados de tiempo de 10 corridas con N procesos.
+Crea una carpeta `Resultados/Time` y dentro de esta guarda todos lo resultados de tiempo de 10 corridas con N procesos. 
