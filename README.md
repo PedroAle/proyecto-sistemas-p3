@@ -1,6 +1,6 @@
 # Proyecto Sistemas de Operacion - Problema 3
 
-Programa que recibe como entrada una lista de N enteros positivos n0, n1, ..., nN-1 y determina si cada uno de estos enteros ni es primo o no. El objetivo de este problema es que al momento de mandar la señal SIGINT, es decir, "Control+C" unicamente en el codigo de procesos imprima un mensaje diciendo "I'm sorry Dave. I'm afraid I can't do that" solo una vez cada por cada llamada.
+Programa que recibe como entrada una lista de N enteros positivos n0, n1, ..., nN-1 y determina si cada uno de estos enteros es primo o no. El objetivo de este problema es que al momento de mandar la señal SIGINT, es decir, "Control+C" unicamente en el codigo de procesos imprima un mensaje diciendo "I'm sorry Dave. I'm afraid I can't do that" solo una vez cada por cada llamada.
 
 ## LLamada
 
