@@ -28,14 +28,14 @@ int main(int argc, char *argv[]) {
 	printf("Proyecto Sistemas de Operacion - Problema 3\n");
 	/*
 	Estos flags permiten determinar un solo modo (-t o -p) en caso de que se llame -tp | -pt | - t - p | etc,
-  que seria el primero en ser llamado
+  que seria el primero en ser llamado.
 	*/
 	int t_flag = 0, p_flag = 0;
 	int numeroDeTrabajadores = 0;
 	char * archivo_entrada;
 
 	if (argc > 1) {
-    //Aumentamos el indice optind para reservar el primer argumento para el archivo de texto de entrada
+    //Aumentamos el indice optind para reservar el primer argumento para el archivo de texto de entrada.
     optind = 2;
 		archivo_entrada = argv[1];
 	} else {
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 
 	LIST* lista_numeros = exportNumbers(archivo_entrada);
-	//Aqui guardamos las sublistas que le corresponde a cada thread/proceso
+	//Aqui guardamos las sublistas que le corresponde a cada thread/proceso.
 	Work* work_pool[numeroDeTrabajadores];
 	dividirTrabajo(lista_numeros, numeroDeTrabajadores, work_pool);
 
@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 	} else if(p_flag) {
 		signal(SIGINT, doNothing);
 		int pid;
-			//Creamos todos los procesos
+			//Creamos todos los procesos.
 			for(int i=0;i<numeroDeTrabajadores;i++){
 					pid = fork();
 					if(pid < 0)
@@ -99,17 +99,17 @@ int main(int argc, char *argv[]) {
 						 	 liberarWorkPool(work_pool, numeroDeTrabajadores);
 							 exit(1);
 					}
-					else if (pid==0) //Si es el proceso hijo, realiza su trabajo y luego sale del ciclo para que no cree mas hijos
+					else if (pid==0) //Si es el proceso hijo, realiza su trabajo y luego sale del ciclo para que no cree mas hijos.
 					{
 							doWork(work_pool[i]);
 							break;
 					}
 			}
-
+			// Recibimos la señal Control+C.
 			signal(SIGINT, sign_handler);
 	}
 
-	//Padre espera por todos los hijos
+	//Padre espera por todos los hijos.
 	while (wait(NULL) > 0);
 
 
@@ -119,10 +119,10 @@ int main(int argc, char *argv[]) {
 }
 
 /**
- * Procesa la lista de numeros de un trabajo guardando el resultado en un nuevo archivo de texto
+ * Procesa la lista de numeros de un trabajo guardando el resultado en un nuevo archivo de texto.
  * cuyo nombre es igual al del id del work.
- * Es llamada por cada thread/proceso con su Work
- * @param  work   Estructura que almacena la lista de numeros a procesar y el identificador del thread/proceso
+ * Es llamada por cada thread/proceso con su Work.
+ * @param  work   Estructura que almacena la lista de numeros a procesar y el identificador del thread/proceso.
  */
 void* doWork(void* work) {
 	LIST* numbers = ((Work*) work)->toProcess;
@@ -146,7 +146,7 @@ void* doWork(void* work) {
 		}
 		aux = aux->next;
 	}
-	//Guardamos el resultado en un archivo de texto
+	//Guardamos el resultado en un archivo de texto.
 	output(numbers,pHead, ((Work*) work)->id);
 	liberarLista(pHead);
 	printf("Trabajador %d - Completado\n", ((Work*) work)->id);
@@ -155,8 +155,8 @@ void* doWork(void* work) {
 /**
  * Divide una lista de numeros equitativamente entre una determinada cantidad de trabajadores.
  * @param  lista_numeros        Cabeza de la lista que sera dividida.
- * @param  numeroDeTrabajadores Cantidad de trabajadores que recibiran parte de la lista_numeros
- * @param  work_pool            Variable donde se almacenara el resultado de la division
+ * @param  numeroDeTrabajadores Cantidad de trabajadores que recibiran parte de la lista_numeros.
+ * @param  work_pool            Variable donde se almacenara el resultado de la division.
  */
 void dividirTrabajo(LIST* lista_numeros, int numeroDeTrabajadores, Work* work_pool[]) {
 	int cantidadDeNumeros = numeroDeElementos(lista_numeros);
@@ -174,7 +174,7 @@ void dividirTrabajo(LIST* lista_numeros, int numeroDeTrabajadores, Work* work_po
 }
 
 /**
- * Valida los argumentos necesarios, devuelve 1 si son validos y 0 si no lo son
+ * Valida los argumentos necesarios, devuelve 1 si son validos y 0 si no lo son.
  * @param   archivo_entrada Archivo de texto que contiene los numeros a trabajar.
  * @param   t_flag          Estado que determina si el programa esta en modo hilos.
  * @param   p_flag 				 Estado que determina si el programa esta en modo procesos.
@@ -201,9 +201,9 @@ int validate_params(char* archivo_entrada, int t_flag, int p_flag, int N) {
 }
 
 /**
- * Exporta los numeros de un archivo de texto (un numero por linea) a una lista
- * @param  file_name  archivo que sera abierto
- * @return            puntero a la cabeza de una nueva lista que contiene los numeros del archivo. Null/0 si no habian numeros
+ * Exporta los numeros de un archivo de texto (un numero por linea) a una lista.
+ * @param  file_name  archivo que sera abierto.
+ * @return            puntero a la cabeza de una nueva lista que contiene los numeros del archivo. Null/0 si no habian numeros.
  */
 LIST* exportNumbers(char* file_name){
 	FILE *fp;
@@ -231,7 +231,7 @@ LIST* exportNumbers(char* file_name){
 
 /**
  * Imprime la lista que recibe en un nuevo archivo de texto cuyo nombre viene dado por el parametro n.
- * @method output
+ * @method output.
  * @param  head   Cabeza de la lista a imprimir.
  * @param  n      Numero que sera el nombre del archivo.
  */
@@ -263,9 +263,9 @@ void output(LIST *head, LIST *aHead, int n){
 }
 
 /**
- * Libera la memoria ocupada por un arreglo de tipo Work*
- * @param  work_pool       Arreglo de Work* a ser liberado
- * @param  array_length    Longitud del arreglo
+ * Libera la memoria ocupada por un arreglo de tipo Work*.
+ * @param  work_pool       Arreglo de Work* a ser liberado.
+ * @param  array_length    Longitud del arreglo.
  */
 void liberarWorkPool(Work* work_pool[], int array_length) {
 	for (int i=0; i < array_length; i++) {
@@ -274,9 +274,9 @@ void liberarWorkPool(Work* work_pool[], int array_length) {
 }
 
 /**
- * Determina si un numero es primo o no
+ * Determina si un numero es primo o no.
  * @param  n       Numero a ser definido como primo o no.
- * @return         1 / 0  = Primo / No primo
+ * @return         1 / 0  = Primo / No primo.
  */
 int isPrimo(int n){
 	if (n == 1)
@@ -285,7 +285,7 @@ int isPrimo(int n){
 	if (n == 0)
 		return 0;
 
-	//Siempre sera divisible entre el 1
+	//Siempre sera divisible entre el 1.
 	int divisores = 1;
 
 	for (int i = 2; i <= n; i++) {
@@ -300,9 +300,9 @@ int isPrimo(int n){
 }
 
 /**
- * Funcion que verifica la existencia de un archivo
+ * Funcion que verifica la existencia de un archivo.
  * @param  file_name Direccion en la cual se verificara si hay un archivo.
- * @return           0 - No existe el archivo. 1 - Existe el archivo
+ * @return           0 - No existe el archivo. 1 - Existe el archivo.
  */
 int file_exists(char* file_name) {
 	FILE* file = fopen(file_name, "r");
@@ -315,11 +315,15 @@ int file_exists(char* file_name) {
 		return 0;
 }
 
+/**
+ * Funcion que recibe la llamada de Control+C e imprime "I'm sorry Dave. I'm afraid I can't do that".
+ */
 void sign_handler(){
 		printf("I'm sorry Dave. I'm afraid I can't do that\n");
-		//Si queremos que se imprima una sola vez en toda la ejecucion del programa, cambiar sign_handler a doNothing
-		signal(SIGINT,sign_handler);
 }
 
+/**
+ * Funcion que se encarga de no hacer nada.
+ */
 void doNothing(){
 }
