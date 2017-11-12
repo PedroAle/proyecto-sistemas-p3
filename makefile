@@ -1,10 +1,5 @@
-primos.o: primos.c
-	gcc -c primos.c -o primos.o -lpthread
-	gcc primos.o -o primos -lpthread
-
-primos: primos.o
-	gcc primos.o -o primos
+primos3:
+	gcc -o primos3 primos3.c -pthread
 
 clean:
-	-rm -f primos.o
-	-rm -f primos
+	-rm -f primos3
